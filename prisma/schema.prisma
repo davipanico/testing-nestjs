@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model game {
+  id        Int        @id @unique
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+  schedule  schedule[]
+}
+
+model user {
+  id                  Int                   @id @unique @default(autoincrement())
+  name                String
+  email               String                @unique
+  password            String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now()) @updatedAt
+  active              Int
+  schedule_has_player schedule_has_player[]
+}
+
+model player {
+  id               Int                @id @unique @default(autoincrement())
+  nickname         String?
+  avatar           String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now())
+  player_has_group player_has_group[]
+}
+
+model group {
+  id                 Int                  @id @unique @default(autoincrement())
+  name               String
+  description        String?
+  avatar             String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @default(now())
+  active             Int
+  player_has_group   player_has_group[]
+  group_has_schedule group_has_schedule[]
+}
+
+model schedule {
+  id                  Int                   @id @unique @default(autoincrement())
+  name                String
+  description         String?
+  game_id             game?                 @relation(fields: [gameId], references: [id])
+  startAt             DateTime
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now())
+  active              Int
+  gameId              Int?
+  group_has_schedule  group_has_schedule[]
+  schedule_has_player schedule_has_player[]
+}
+
+model player_has_group {
+  id        Int    @id @unique @default(autoincrement())
+  group_id  group  @relation(fields: [groupId], references: [id])
+  player_id player @relation(fields: [playerId], references: [id])
+  active    Int
+  groupId   Int
+  playerId  Int
+}
+
+model group_has_schedule {
+  id          String   @id @unique @default(cuid())
+  group_id    group    @relation(fields: [groupId], references: [id])
+  schedule_id schedule @relation(fields: [scheduleId], references: [id])
+  active      Int
+  groupId     Int
+  scheduleId  Int
+}
+
+model schedule_has_player {
+  id          String   @id @unique @default(cuid())
+  schedule_id schedule @relation(fields: [scheduleId], references: [id])
+  user_id     user     @relation(fields: [userId], references: [id])
+  active      Int
+  scheduleId  Int
+  userId      Int
+}
