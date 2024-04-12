@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { prismaExclude } from 'src/utils/utils';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
+
   create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+    return this.prisma.user.create({ data: createUserDto });
   }
 
   findAll() {
@@ -15,11 +17,16 @@ export class UsersService {
   }
 
   findAllActive() {
-    return this.prisma.user.findMany({ where: { active: 1 } });
+    return this.prisma.user.findMany({ where: { active: 1 },
+    select: prismaExclude('User', ['password'])
+    });
   }
 
   findOne(id: number) {
-    return this.prisma.user.findFirst({ where: { id: id } });
+    return this.prisma.user.findFirst({ 
+      where: { id: id }, 
+      select: prismaExclude('User', ['password'])
+    });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -28,7 +35,7 @@ export class UsersService {
 
   remove(id: number) {
     return this.prisma.user.update({
-      where: { id: 1 },
+      where: { id: id },
       data: { active: 0 },
     });
   }
