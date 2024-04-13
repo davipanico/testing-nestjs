@@ -22,6 +22,12 @@ export class UsersService {
     });
   }
 
+  findByEmail(email: string) {
+    return this.prisma.user.findFirst({ 
+      where: { email }
+    });
+  }
+
   findOne(id: number) {
     return this.prisma.user.findFirst({ 
       where: { id: id }, 
